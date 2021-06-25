@@ -1,9 +1,12 @@
 package com.vmv.services.product.controller;
 
+import com.vmv.services.product.command.CreateProductCommand;
 import com.vmv.services.product.dto.ProductDto;
 import com.vmv.services.product.dto.request.ProductCreationRequest;
 import com.vmv.services.product.dto.request.ProductUpdateRequest;
 import com.vmv.services.product.dto.wrapper.ProductResponse;
+import lombok.RequiredArgsConstructor;
+import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,14 +18,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.UUID;
+
+@RequiredArgsConstructor
 @RestController
-// http://localhost:8080/v1/api/products
+// http://localhost:8080/v1/products
 @RequestMapping("v1/products")
 public class ProductController extends AbstractController {
 
+    final CommandGateway commandGateway;
+
     @GetMapping(value = "/{id}")
     public ResponseEntity getProduct(@PathVariable String id) {
-        var productDto = new ProductDto();
+        var productDto = ProductDto.builder().build();
+
         var response = new ProductResponse();
         response.setProduct(productDto);
         return setSuccess(HttpStatus.OK, response);
@@ -30,15 +39,34 @@ public class ProductController extends AbstractController {
 
     @PostMapping()
     public ResponseEntity createProduct(@RequestBody ProductCreationRequest request) {
-        var productDto = new ProductDto();
-        var response = new ProductResponse();
-        response.setProduct(productDto);
-        return setSuccess(HttpStatus.CREATED, response);
+        CreateProductCommand creationCommand = CreateProductCommand.builder()
+                .title(request.getTitle())
+                .sellingPrice(request.getSellingPrice())
+                .subCategoryId(request.getSubCategoryId())
+                .image(request.getImage())
+                .tags(request.getTags())
+                .id(UUID.randomUUID().toString())
+                .build();
+
+        String returnValue;
+        try {
+            returnValue = commandGateway.sendAndWait(creationCommand);
+        } catch (Exception ex) {
+            returnValue = ex.getLocalizedMessage();
+        }
+
+//        var productDto = ProductDto.builder().build();
+//
+//        var response = new ProductResponse();
+//        response.setProduct(productDto);
+
+        return setSuccess(HttpStatus.CREATED, returnValue);
     }
 
     @PatchMapping(value = "/{id}")
     public ResponseEntity updateProduct(@PathVariable String id, @RequestBody ProductUpdateRequest request) {
-        var productDto = new ProductDto();
+        var productDto = ProductDto.builder().build();
+
         var response = new ProductResponse();
         response.setProduct(productDto);
         return setSuccess(HttpStatus.OK, response);
@@ -46,7 +74,8 @@ public class ProductController extends AbstractController {
 
     @DeleteMapping(value = "/{id}")
     public ResponseEntity deleteProduct(@PathVariable String id) {
-        var productDto = new ProductDto();
+        var productDto = ProductDto.builder().build();
+
         var response = new ProductResponse();
         response.setProduct(productDto);
         return setSuccess(HttpStatus.NO_CONTENT, response);

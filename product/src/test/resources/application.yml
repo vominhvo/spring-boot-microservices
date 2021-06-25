@@ -16,5 +16,3 @@ axon:
     processors:
       product-group:
         mode: subscribing
-
-

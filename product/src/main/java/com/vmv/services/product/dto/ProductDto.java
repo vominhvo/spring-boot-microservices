@@ -1,15 +1,25 @@
 package com.vmv.services.product.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import java.util.List;
+
+import java.math.BigDecimal;
 
 @Setter
 @Getter
+@Builder
 public class ProductDto {
-    private String id;
-    private int type;
-    private String name;
+    private int id;
+    private int categoryId;
+    private int subCategoryId;
+    private String sku;
+    private String title;
+    private BigDecimal sellingPrice;
+    private BigDecimal originalPrice;
+    private BigDecimal discount;
+    private String description;
     private String image;
-    private List<String> tags;
+    private int stock;
+    private String tags;
 }

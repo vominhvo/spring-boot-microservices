@@ -1,11 +1,11 @@
-package com.vmv.services.product.dto.request;
+package com.vmv.services.product.core.event;
 
 import lombok.Data;
 import java.math.BigDecimal;
 
-
 @Data
-public class ProductCreationRequest {
+public class ProductCreatedEvent {
+    private String id;
     private String title;
     private BigDecimal sellingPrice;
     private int subCategoryId;
